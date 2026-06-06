@@ -27,11 +27,16 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
 
 | Playbook | What it does | Homelab use case |
 |---|---|---|
-| `backup-configs.yml` | Backs up important configuration files from managed VMs | Keeps copies of SSH, hostname, fstab, and service configs |
-| `reboot-vms.yml` | Reboots selected Linux VMs safely | Used for controlled maintenance windows |
-| `reboot-report.yml` | Checks uptime/reboot status after maintenance | Confirms systems came back online properly |
-| `system-update.yml` | Updates packages on managed Linux systems | Keeps homelab VMs patched |
-| `maintenance.yml` | Runs basic cleanup and maintenance tasks | Helps keep systems stable and clean |
+| `backup-configs.yml` | Backs up important configuration files from managed VMs | Keeps copies of SSH, hostname, fstab, and service configs (Maintenance Related) |
+| `reboot-vms.yml` | Reboots selected Linux VMs safely | Used for controlled maintenance windows (Maintenance Related) |
+| `reboot-report.yml` | Checks uptime/reboot status after maintenance | Confirms systems came back online properly (Maintenance Related) |
+| `update-all.yml` | Updates packages on all managed Linux systems | Keeps homelab VMs patched (Maintenance Related) |
+
+
+## Scripts
+| Script | What it does | Homelab use case |
+|---|---|---|
+| `maintenance` | Executes the maintenance-related playbooks |
 
 ## Example Inventory
 
