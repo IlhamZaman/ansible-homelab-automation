@@ -1,0 +1,57 @@
+---
+- name: Install baseline packages on Debian and Ubuntu
+  hosts: ubuntu_servers:debian_servers
+  become: true
+
+  tasks:
+    - name: Install useful packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - wget
+          - git
+          - htop
+          - nano
+          - vim
+          - unzip
+          - tar
+          - ca-certificates
+          - net-tools
+          - dnsutils
+        state: present
+        update_cache: true
+
+
+- name: Install baseline packages on Fedora and AlmaLinux
+  hosts: fedora_servers:management
+  become: true
+
+  tasks:
+    - name: Install useful packages
+      ansible.builtin.dnf:
+        name:
+          - curl
+          - wget
+          - git
+          - htop
+          - nano
+          - vim
+          - unzip
+          - tar
+          - ca-certificates
+          - net-tools
+          - bind-utils
+        state: present
+
+
+- name: Install baseline packages on openSUSE
+  hosts: opensuse_servers
+  become: true
+
+  tasks:
+    - name: Install useful packages
+      ansible.builtin.command: >
+        zypper --non-interactive install
+        curl wget git htop nano vim unzip tar ca-certificates net-tools bind-utils
+      register: zypper_baseline
+      changed_when: "'Nothing to do' not in zypper_baseline.stdout"

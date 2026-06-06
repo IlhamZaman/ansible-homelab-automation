@@ -1,0 +1,15 @@
+---
+- name: Reboot all Linux servers
+  hosts: linux_servers
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Reboot server
+      ansible.builtin.reboot:
+        msg: "Reboot triggered by Ansible"
+        reboot_timeout: 600
+        connect_timeout: 10
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami

@@ -1,0 +1,45 @@
+---
+- name: Basic homelab Linux health check
+  hosts: linux_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Show hostname
+      ansible.builtin.command: hostname
+      register: hostname_result
+      changed_when: false
+
+    - name: Show uptime
+      ansible.builtin.command: uptime
+      register: uptime_result
+      changed_when: false
+
+    - name: Show disk usage
+      ansible.builtin.command: df -h
+      register: disk_result
+      changed_when: false
+
+    - name: Show memory usage
+      ansible.builtin.command: free -h
+      register: memory_result
+      changed_when: false
+
+    - name: Show failed systemd services
+      ansible.builtin.command: systemctl --failed --no-pager
+      register: failed_services_result
+      changed_when: false
+      failed_when: false
+
+    - name: Print summary
+      ansible.builtin.debug:
+        msg:
+          - "Host: {{ inventory_hostname }}"
+          - "Hostname: {{ hostname_result.stdout }}"
+          - "Uptime: {{ uptime_result.stdout }}"
+          - "Memory:"
+          - "{{ memory_result.stdout_lines }}"
+          - "Disk:"
+          - "{{ disk_result.stdout_lines }}"
+          - "Failed services:"
+          - "{{ failed_services_result.stdout_lines }}"

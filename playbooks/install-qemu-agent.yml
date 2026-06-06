@@ -1,0 +1,51 @@
+---
+- name: Install and enable qemu-guest-agent on Debian and Ubuntu
+  hosts: ubuntu_servers:debian_servers
+  become: true
+
+  tasks:
+    - name: Install qemu-guest-agent
+      ansible.builtin.apt:
+        name: qemu-guest-agent
+        state: present
+        update_cache: true
+
+    - name: Enable and start qemu-guest-agent
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+        enabled: true
+        state: started
+
+
+- name: Install and enable qemu-guest-agent on Fedora and AlmaLinux
+  hosts: fedora_servers:management
+  become: true
+
+  tasks:
+    - name: Install qemu-guest-agent
+      ansible.builtin.dnf:
+        name: qemu-guest-agent
+        state: present
+
+    - name: Enable and start qemu-guest-agent
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+        enabled: true
+        state: started
+
+
+- name: Install and enable qemu-guest-agent on openSUSE
+  hosts: opensuse_servers
+  become: true
+
+  tasks:
+    - name: Install qemu-guest-agent
+      ansible.builtin.command: zypper --non-interactive install qemu-guest-agent
+      register: zypper_qemu
+      changed_when: "'Nothing to do' not in zypper_qemu.stdout"
+
+    - name: Enable and start qemu-guest-agent
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+        enabled: true
+        state: started

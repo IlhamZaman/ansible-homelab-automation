@@ -1,0 +1,79 @@
+---
+- name: Check Cloudflare gateway services
+  hosts: ubuntu_servers
+  become: true
+  tasks:
+    - name: Check cloudflared
+      ansible.builtin.systemd:
+        name: cloudflared
+      register: cloudflared_status
+      failed_when: false
+
+    - name: Show cloudflared status
+      ansible.builtin.debug:
+        msg: "cloudflared is {{ cloudflared_status.status.ActiveState | default('not found') }}"
+
+    - name: Check nginx
+      ansible.builtin.systemd:
+        name: nginx
+      register: nginx_status
+      failed_when: false
+
+    - name: Show nginx status
+      ansible.builtin.debug:
+        msg: "nginx is {{ nginx_status.status.ActiveState | default('not found') }}"
+
+
+- name: Check Fedora Kuma and Homepage services
+  hosts: fedora_servers
+  become: true
+  tasks:
+    - name: Check Homepage service
+      ansible.builtin.systemd:
+        name: homepage
+      register: homepage_status
+      failed_when: false
+
+    - name: Show Homepage status
+      ansible.builtin.debug:
+        msg: "homepage is {{ homepage_status.status.ActiveState | default('not found') }}"
+
+    - name: Check PM2 service for Uptime Kuma
+      ansible.builtin.command: systemctl list-units --type=service | grep pm2
+      register: pm2_status
+      changed_when: false
+      failed_when: false
+
+    - name: Show PM2 service result
+      ansible.builtin.debug:
+        var: pm2_status.stdout_lines
+
+
+- name: Check Jellyfin service
+  hosts: jellyfin
+  become: true
+  tasks:
+    - name: Check jellyfin
+      ansible.builtin.systemd:
+        name: jellyfin
+      register: jellyfin_status
+      failed_when: false
+
+    - name: Show Jellyfin status
+      ansible.builtin.debug:
+        msg: "jellyfin is {{ jellyfin_status.status.ActiveState | default('not found') }}"
+
+
+- name: Check Technitium service
+  hosts: technitium
+  become: true
+  tasks:
+    - name: Check Technitium DNS service
+      ansible.builtin.systemd:
+        name: dns
+      register: technitium_status
+      failed_when: false
+
+    - name: Show Technitium DNS status
+      ansible.builtin.debug:
+        msg: "Technitium dns service is {{ technitium_status.status.ActiveState | default('not found') }}"

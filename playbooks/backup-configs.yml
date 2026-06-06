@@ -1,0 +1,113 @@
+---
+- name: Back up important homelab config files
+  hosts: linux_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Create local backup folder for each host
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Back up SSH server config if it exists
+      ansible.builtin.fetch:
+        src: /etc/ssh/sshd_config
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/sshd_config"
+        flat: true
+      failed_when: false
+
+    - name: Back up fstab if it exists
+      ansible.builtin.fetch:
+        src: /etc/fstab
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/fstab"
+        flat: true
+      failed_when: false
+
+    - name: Back up hostname
+      ansible.builtin.fetch:
+        src: /etc/hostname
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/hostname"
+        flat: true
+      failed_when: false
+
+
+- name: Back up Homepage config files
+  hosts: kuma-homepage
+  become: true
+
+  tasks:
+    - name: Create local Homepage backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/homepage"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Fetch Homepage config files
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/homepage/"
+        flat: true
+      loop:
+        - /opt/homepage/app/config/settings.yaml
+        - /opt/homepage/app/config/services.yaml
+        - /opt/homepage/app/config/widgets.yaml
+        - /opt/homepage/app/config/bookmarks.yaml
+      failed_when: false
+
+
+- name: Back up Cloudflare gateway configs
+  hosts: cloudflare-gateway
+  become: true
+
+  tasks:
+    - name: Create local gateway backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/gateway"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Fetch Nginx site configs
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/gateway/"
+        flat: true
+      loop:
+        - /etc/nginx/sites-available/proxmox
+        - /etc/nginx/sites-available/truenas
+      failed_when: false
+
+
+- name: Back up Minecraft server config
+  hosts: minecraft
+  become: true
+
+  tasks:
+    - name: Create local Minecraft backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Fetch Minecraft server.properties
+      ansible.builtin.fetch:
+        src: /opt/minecraft/server.properties
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/server.properties"
+        flat: true
+      failed_when: false
+
+    - name: Fetch Minecraft whitelist
+      ansible.builtin.fetch:
+        src: /opt/minecraft/whitelist.json
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/whitelist.json"
+        flat: true
+      failed_when: false

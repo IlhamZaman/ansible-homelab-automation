@@ -1,0 +1,60 @@
+---
+- name: Check reboot requirements on Ubuntu and Debian VMs
+  hosts: ubuntu_servers:debian_servers
+  become: true
+  tasks:
+    - name: Check if reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Report reboot requirement
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} requires a reboot."
+      when: reboot_required.stat.exists
+
+    - name: Report no reboot required
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} does not require a reboot."
+      when: not reboot_required.stat.exists
+
+
+- name: Check reboot requirements on Fedora VMs
+  hosts: fedora_servers
+  become: true
+  tasks:
+    - name: Check if reboot is required on Fedora
+      ansible.builtin.command: needs-restarting -r
+      register: fedora_reboot_check
+      failed_when: false
+      changed_when: false
+
+    - name: Report Fedora reboot requirement
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} requires a reboot."
+      when: fedora_reboot_check.rc == 1
+
+    - name: Report no Fedora reboot required
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} does not require a reboot."
+      when: fedora_reboot_check.rc == 0
+
+    - name: Report Fedora reboot check issue
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} reboot check could not be confirmed. Output: {{ fedora_reboot_check.stdout | default('') }} {{ fedora_reboot_check.stderr | default('') }}"
+      when: fedora_reboot_check.rc not in [0, 1]
+
+
+- name: Check reboot requirements on openSUSE VMs
+  hosts: opensuse_servers
+  become: true
+  tasks:
+    - name: Check if reboot is required on openSUSE
+      ansible.builtin.command: zypper ps -s
+      register: opensuse_reboot_check
+      failed_when: false
+      changed_when: false
+
+    - name: Report openSUSE reboot check output
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} reboot check output: {{ opensuse_reboot_check.stdout }}"
