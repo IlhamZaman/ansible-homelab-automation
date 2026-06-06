@@ -12,7 +12,7 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
   - Technitium DNS VM (openSUSE Leap)
   - Kuma / Homepage VM (Fedora Workstation 44)
 - Network: Private homelab LAN with no public SSH exposure
-- Remote Access: Cloudflare Tunnel where needed
+- Remote Access: Local SSH access in AlmaLinux through SSH keys only
 
 ## Inventory Groups
 
