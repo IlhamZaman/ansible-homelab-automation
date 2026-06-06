@@ -31,6 +31,7 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
 | `reboot-vms.yml` | Reboots selected Linux VMs safely | Used for controlled maintenance windows (Maintenance Related) |
 | `reboot-report.yml` | Checks uptime/reboot status after maintenance | Confirms systems came back online properly (Maintenance Related) |
 | `update-all.yml` | Updates packages on all managed Linux systems | Keeps homelab VMs patched (Maintenance Related) |
+| `health-check.yml` | Checks uptime, disk, memory, and failed services on all managed Linux systems | Quick VM health overview |
 | `baseline-packages.yml` | Installs basic tools on all managed Linux systems | Helps with replicating systems quickly |
 | `install-qemu-agent.yml` | Installs and starts the QEMU Guest Agent on managed Linux systems | Allows for better VM management |
 | `check-services.yml` | Checks status of important services on all managed Linux systems | Verifies cloudflared, nginx, Homepage, Uptime Kuma, Jellyfin, and Technitium DNS are running (Maintenance Related) |
