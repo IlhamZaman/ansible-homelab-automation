@@ -10,7 +10,7 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
   - Cloudflare Gateway VM (Ubuntu Server 26.04)
   - Jellyfin VM (Debian 13.4)
   - Technitium DNS VM (openSUSE Leap)
-  - Kuma / Homepage VM (Fedora Workstation 44)
+  - Uptime Kuma / Homepage VM (Fedora Workstation 44)
 - Network: Private homelab LAN with no public SSH exposure
 - Remote Access: Local SSH access in AlmaLinux through SSH keys only
 
