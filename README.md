@@ -39,7 +39,7 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
 
 ## Scripts
 | Script | What it does | 
-|---|---|---|
+|---|---|
 | `maintenance` | Executes the maintenance-related playbooks |
 
 ## Example Inventory
