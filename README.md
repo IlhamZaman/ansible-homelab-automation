@@ -31,7 +31,6 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
 | `backup-configs.yml` | Backs up important configuration files from managed VMs | Keeps copies of SSH, hostname, fstab, and service configs |
 | `reboot-vms.yml` | Reboots selected Linux VMs safely | Used for controlled maintenance windows |
 | `reboot-report.yml` | Checks uptime/reboot status after maintenance | Confirms systems came back online properly |
-| `ssh-hardening.yml` | Applies SSH security improvements | Reduces risky SSH settings across VMs |
 | `system-update.yml` | Updates packages on managed Linux systems | Keeps homelab VMs patched |
 | `maintenance.yml` | Runs basic cleanup and maintenance tasks | Helps keep systems stable and clean |
 
