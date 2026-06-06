@@ -1,6 +1,5 @@
-# Ansible Homelab Automation
+# Ansible Homelab Automation 
 
-Automated infrastructure management lab running on AlmaLinux 9 built for my Proxmox-based homelab.  
 I used Ansible to automate the management of my Linux virtual machines. It handles things such as backing up the important config files, updating the virtual machines, checking if a reboot is needed, and then rebooting the systems. 
 
 ## Architecture
