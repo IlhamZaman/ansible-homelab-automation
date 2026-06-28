@@ -1,6 +1,6 @@
 # Ansible Homelab Automation 
 
-I used Ansible to automate the management of my Linux virtual machines. It handles tasks such as backing up important config files, updating virtual machines, checking whether a reboot is needed, and rebooting the systems. 
+I used Ansible to automate the management of my Hypervisor, TrueNAS, and Linux virtual machines. It handles tasks such as backing up important config files, updating virtual machines, checking whether a reboot is needed, and rebooting the systems. 
 
 ## Architecture
 
