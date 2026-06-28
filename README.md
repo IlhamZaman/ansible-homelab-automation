@@ -8,7 +8,7 @@ I used Ansible to automate the management of my Linux virtual machines. It handl
 - Control Node: AlmaLinux 9 Management VM
 - Managed Services:
   - Proxmox VE Hypervisor
-  - AlmaLinux Management VM
+  - Management VM
   - Cloudflare Gateway VM (Ubuntu Server 26.04)
   - TrueNAS Scale
   - Jellyfin VM (Debian 13.4)
