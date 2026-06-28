@@ -1,0 +1,25 @@
+---
+- name: Update Fedora servers
+  hosts: fedora_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Upgrade all Fedora packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Autoremove unused packages
+      ansible.builtin.dnf:
+        autoremove: true
+
+    - name: Check if reboot may be needed
+      ansible.builtin.command: needs-restarting -r
+      register: reboot_check
+      changed_when: false
+      failed_when: false
+
+    - name: Show reboot check result
+      ansible.builtin.debug:
+        var: reboot_check.stdout_lines

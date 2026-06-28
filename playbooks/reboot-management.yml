@@ -1,0 +1,38 @@
+---
+- name: Schedule AlmaLinux Management VM reboot
+  hosts: management_vm
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    confirm_management_reboot: false
+    reboot_delay_minutes: 1
+
+  pre_tasks:
+    - name: Safety confirmation
+      ansible.builtin.fail:
+        msg: >
+          This playbook will reboot the AlmaLinux Management VM.
+          Since this VM runs Ansible, your current Ansible session may disconnect.
+          Run again with:
+          -e confirm_management_reboot=true
+      when: not confirm_management_reboot | bool
+
+  tasks:
+    - name: Schedule Management VM reboot
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/shutdown
+          - -r
+          - "+{{ reboot_delay_minutes }}"
+          - "Ansible scheduled Management VM reboot"
+      async: 5
+      poll: 0
+      changed_when: true
+
+    - name: Show reboot message
+      ansible.builtin.debug:
+        msg: >
+          Management VM reboot scheduled in {{ reboot_delay_minutes }} minute(s).
+          Your Ansible session may disconnect when the VM shuts down.

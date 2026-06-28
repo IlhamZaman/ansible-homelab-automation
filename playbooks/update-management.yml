@@ -1,0 +1,36 @@
+---
+- name: Update AlmaLinux Management VM
+  hosts: management_vm
+  become: true
+  gather_facts: true
+  serial: 1
+
+  tasks:
+    - name: Confirm this is AlmaLinux or RedHat-family
+      ansible.builtin.assert:
+        that:
+          - ansible_os_family == "RedHat"
+        fail_msg: "This playbook is only for the AlmaLinux Management VM."
+        success_msg: "Confirmed RedHat-family Management VM."
+
+    - name: Update all Management VM packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Remove unused packages
+      ansible.builtin.dnf:
+        autoremove: true
+
+    - name: Check if Management VM reboot may be needed
+      ansible.builtin.command: dnf needs-restarting -r
+      register: management_reboot_check
+      changed_when: false
+      failed_when: false
+
+    - name: Show Management VM reboot check result
+      ansible.builtin.debug:
+        msg:
+          - "Management VM reboot check return code: {{ management_reboot_check.rc }}"
+          - "{{ management_reboot_check.stdout_lines }}"
+          - "{{ management_reboot_check.stderr_lines }}"

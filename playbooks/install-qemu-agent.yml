@@ -1,5 +1,5 @@
 ---
-- name: Install and enable qemu-guest-agent on Debian and Ubuntu
+- name: Install and enable qemu-guest-agent on Debian and Ubuntu VMs
   hosts: ubuntu_servers:debian_servers
   become: true
 
@@ -17,8 +17,8 @@
         state: started
 
 
-- name: Install and enable qemu-guest-agent on Fedora and AlmaLinux
-  hosts: fedora_servers:management
+- name: Install and enable qemu-guest-agent on Fedora VMs
+  hosts: fedora_servers
   become: true
 
   tasks:
@@ -34,7 +34,7 @@
         state: started
 
 
-- name: Install and enable qemu-guest-agent on openSUSE
+- name: Install and enable qemu-guest-agent on openSUSE VMs
   hosts: opensuse_servers
   become: true
 

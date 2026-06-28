@@ -1,6 +1,6 @@
 ---
 - name: Basic homelab Linux health check
-  hosts: linux_servers
+  hosts: linux_maintenance_targets
   become: true
   gather_facts: true
 

@@ -1,0 +1,37 @@
+---
+- name: Schedule Proxmox host reboot
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    confirm_proxmox_reboot: false
+    reboot_delay_minutes: 1
+
+  pre_tasks:
+    - name: Safety confirmation
+      ansible.builtin.fail:
+        msg: >
+          This playbook will reboot the Proxmox host, which will shut down
+          the Ansible Management VM too. Run again with:
+          -e confirm_proxmox_reboot=true
+      when: not confirm_proxmox_reboot | bool
+
+  tasks:
+    - name: Schedule Proxmox reboot
+      ansible.builtin.command:
+        argv:
+          - /usr/sbin/shutdown
+          - -r
+          - "+{{ reboot_delay_minutes }}"
+          - "Ansible scheduled Proxmox reboot"
+      async: 5
+      poll: 0
+      changed_when: true
+
+    - name: Show reboot message
+      ansible.builtin.debug:
+        msg: >
+          Proxmox reboot scheduled in {{ reboot_delay_minutes }} minute(s).
+          Your Ansible Management VM will go offline when Proxmox shuts down.

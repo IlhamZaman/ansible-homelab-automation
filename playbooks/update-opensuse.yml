@@ -1,0 +1,25 @@
+---
+- name: Update openSUSE servers
+  hosts: opensuse_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Refresh zypper repositories
+      ansible.builtin.command: zypper --non-interactive refresh
+      changed_when: false
+
+    - name: Update all openSUSE packages
+      ansible.builtin.command: zypper --non-interactive update
+      register: zypper_update
+      changed_when: "'Nothing to do' not in zypper_update.stdout"
+
+    - name: Check openSUSE reboot-related processes
+      ansible.builtin.command: zypper ps -s
+      register: opensuse_reboot_check
+      changed_when: false
+      failed_when: false
+
+    - name: Show openSUSE reboot check output
+      ansible.builtin.debug:
+        var: opensuse_reboot_check.stdout_lines

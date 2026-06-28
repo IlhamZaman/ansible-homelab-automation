@@ -1,0 +1,34 @@
+---
+- name: Update Debian and Ubuntu VMs
+  hosts: ubuntu_servers:debian_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Upgrade packages
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Remove unused packages
+      ansible.builtin.apt:
+        autoremove: true
+
+    - name: Check if reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Show reboot required message
+      ansible.builtin.debug:
+        msg: "Reboot required on {{ inventory_hostname }}"
+      when: reboot_required.stat.exists
+
+    - name: Show no reboot required message
+      ansible.builtin.debug:
+        msg: "No reboot required on {{ inventory_hostname }}"
+      when: not reboot_required.stat.exists

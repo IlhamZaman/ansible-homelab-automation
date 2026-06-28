@@ -1,0 +1,38 @@
+---
+- name: Update Proxmox VE host packages
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  serial: 1
+
+  tasks:
+    - name: Confirm this host is Proxmox VE
+      ansible.builtin.command: pveversion
+      register: pveversion_output
+      changed_when: false
+
+    - name: Show Proxmox version
+      ansible.builtin.debug:
+        msg: "{{ pveversion_output.stdout }}"
+
+    - name: Update apt cache on Proxmox
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Upgrade Proxmox packages
+      ansible.builtin.apt:
+        upgrade: full
+
+    - name: Remove unused apt packages on Proxmox
+      ansible.builtin.apt:
+        autoremove: true
+
+    - name: Check if Proxmox reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: proxmox_reboot_required
+
+    - name: Show Proxmox reboot status
+      ansible.builtin.debug:
+        msg: "Proxmox reboot required: {{ proxmox_reboot_required.stat.exists }}"

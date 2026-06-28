@@ -1,4 +1,75 @@
 ---
+- name: Check Proxmox host services
+  hosts: proxmox_hosts
+  become: true
+  tasks:
+    - name: Check ssh
+      ansible.builtin.systemd:
+        name: ssh
+      register: ssh_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show ssh status
+      ansible.builtin.debug:
+        msg: "ssh is {{ ssh_status.status.ActiveState | default('not found') }}"
+
+    - name: Check pveproxy
+      ansible.builtin.systemd:
+        name: pveproxy
+      register: pveproxy_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show pveproxy status
+      ansible.builtin.debug:
+        msg: "pveproxy is {{ pveproxy_status.status.ActiveState | default('not found') }}"
+
+    - name: Check pvedaemon
+      ansible.builtin.systemd:
+        name: pvedaemon
+      register: pvedaemon_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show pvedaemon status
+      ansible.builtin.debug:
+        msg: "pvedaemon is {{ pvedaemon_status.status.ActiveState | default('not found') }}"
+
+    - name: Check pvestatd
+      ansible.builtin.systemd:
+        name: pvestatd
+      register: pvestatd_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show pvestatd status
+      ansible.builtin.debug:
+        msg: "pvestatd is {{ pvestatd_status.status.ActiveState | default('not found') }}"
+
+    - name: Check pve-cluster
+      ansible.builtin.systemd:
+        name: pve-cluster
+      register: pve_cluster_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show pve-cluster status
+      ansible.builtin.debug:
+        msg: "pve-cluster is {{ pve_cluster_status.status.ActiveState | default('not found') }}"
+
+    - name: Check prometheus-node-exporter
+      ansible.builtin.systemd:
+        name: prometheus-node-exporter
+      register: prometheus_node_exporter_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show prometheus-node-exporter status
+      ansible.builtin.debug:
+        msg: "prometheus-node-exporter is {{ prometheus_node_exporter_status.status.ActiveState | default('not found') }}"
+
+
 - name: Check Cloudflare gateway services
   hosts: ubuntu_servers
   become: true
@@ -8,6 +79,7 @@
         name: cloudflared
       register: cloudflared_status
       failed_when: false
+      changed_when: false
 
     - name: Show cloudflared status
       ansible.builtin.debug:
@@ -18,6 +90,7 @@
         name: nginx
       register: nginx_status
       failed_when: false
+      changed_when: false
 
     - name: Show nginx status
       ansible.builtin.debug:
@@ -33,6 +106,7 @@
         name: homepage
       register: homepage_status
       failed_when: false
+      changed_when: false
 
     - name: Show Homepage status
       ansible.builtin.debug:
@@ -58,6 +132,7 @@
         name: jellyfin
       register: jellyfin_status
       failed_when: false
+      changed_when: false
 
     - name: Show Jellyfin status
       ansible.builtin.debug:
@@ -73,7 +148,93 @@
         name: dns
       register: technitium_status
       failed_when: false
+      changed_when: false
 
     - name: Show Technitium DNS status
       ansible.builtin.debug:
         msg: "Technitium dns service is {{ technitium_status.status.ActiveState | default('not found') }}"
+
+
+- name: Check TrueNAS middleware and managed services
+  hosts: truenas_servers
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Check TrueNAS middleware readiness
+      ansible.builtin.raw: /usr/bin/midclt call system.ready
+      register: truenas_ready
+      changed_when: false
+
+    - name: Show TrueNAS middleware status
+      ansible.builtin.debug:
+        msg: "TrueNAS middleware ready: {{ truenas_ready.stdout | trim }}"
+
+    - name: Query TrueNAS services
+      ansible.builtin.raw: /usr/bin/midclt call service.query
+      register: truenas_services_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Show TrueNAS services raw output
+      ansible.builtin.debug:
+        msg: "{{ truenas_services_raw.stdout_lines }}"
+      when: truenas_services_raw.rc == 0
+
+- name: Check AlmaLinux Management VM services
+  hosts: management_vm
+  become: true
+  tasks:
+    - name: Check sshd
+      ansible.builtin.systemd:
+        name: sshd
+      register: management_sshd_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show sshd status
+      ansible.builtin.debug:
+        msg: "sshd is {{ management_sshd_status.status.ActiveState | default('not found') }}"
+
+    - name: Check crond
+      ansible.builtin.systemd:
+        name: crond
+      register: management_crond_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show crond status
+      ansible.builtin.debug:
+        msg: "crond is {{ management_crond_status.status.ActiveState | default('not found') }}"
+
+    - name: Check chronyd
+      ansible.builtin.systemd:
+        name: chronyd
+      register: management_chronyd_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show chronyd status
+      ansible.builtin.debug:
+        msg: "chronyd is {{ management_chronyd_status.status.ActiveState | default('not found') }}"
+
+    - name: Check firewalld
+      ansible.builtin.systemd:
+        name: firewalld
+      register: management_firewalld_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show firewalld status
+      ansible.builtin.debug:
+        msg: "firewalld is {{ management_firewalld_status.status.ActiveState | default('not found') }}"
+
+    - name: Check qemu-guest-agent
+      ansible.builtin.systemd:
+        name: qemu-guest-agent
+      register: management_qemu_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show qemu-guest-agent status
+      ansible.builtin.debug:
+        msg: "qemu-guest-agent is {{ management_qemu_status.status.ActiveState | default('not found') }}"

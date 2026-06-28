@@ -1,5 +1,5 @@
 ---
-- name: Install baseline packages on Debian and Ubuntu
+- name: Install baseline packages on Debian and Ubuntu VMs
   hosts: ubuntu_servers:debian_servers
   become: true
 
@@ -22,8 +22,8 @@
         update_cache: true
 
 
-- name: Install baseline packages on Fedora and AlmaLinux
-  hosts: fedora_servers:management
+- name: Install baseline packages on Fedora VMs
+  hosts: fedora_servers
   become: true
 
   tasks:
@@ -44,7 +44,7 @@
         state: present
 
 
-- name: Install baseline packages on openSUSE
+- name: Install baseline packages on openSUSE VMs
   hosts: opensuse_servers
   become: true
 
@@ -55,3 +55,29 @@
         curl wget git htop nano vim unzip tar ca-certificates net-tools bind-utils
       register: zypper_baseline
       changed_when: "'Nothing to do' not in zypper_baseline.stdout"
+
+- name: Install baseline packages on AlmaLinux Management VM
+  hosts: management_vm
+  become: true
+
+  tasks:
+    - name: Install useful Management VM packages
+      ansible.builtin.dnf:
+        name:
+          - curl
+          - wget
+          - git
+          - htop
+          - nano
+          - vim
+          - unzip
+          - tar
+          - ca-certificates
+          - net-tools
+          - bind-utils
+          - dnf-plugins-core
+          - python3
+          - python3-pip
+          - openssh-clients
+          - rsync
+        state: present

@@ -1,0 +1,139 @@
+---
+- name: TrueNAS update maintenance
+  hosts: truenas_servers
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    truenas_apply_updates: false
+    truenas_reboot_after_update: true
+    truenas_reboot_timeout_seconds: 7200
+
+  tasks:
+    - name: Verify midclt exists
+      ansible.builtin.raw: test -x /usr/bin/midclt
+      changed_when: false
+
+    - name: Wait for TrueNAS middleware to become ready
+      ansible.builtin.raw: /usr/bin/midclt call system.ready
+      register: truenas_ready
+      until: truenas_ready.stdout | trim | lower == "true"
+      retries: 30
+      delay: 10
+      changed_when: false
+
+    - name: Show TrueNAS middleware readiness result
+      ansible.builtin.debug:
+        msg: "TrueNAS middleware ready result: {{ truenas_ready.stdout | trim }}"
+
+    - name: Get current TrueNAS version
+      ansible.builtin.raw: /usr/bin/midclt call system.version
+      register: truenas_version
+      changed_when: false
+
+    - name: Get TrueNAS update status
+      ansible.builtin.raw: /usr/bin/midclt call update.status
+      register: truenas_update_status_raw
+      changed_when: false
+
+    - name: Parse TrueNAS update status
+      ansible.builtin.set_fact:
+        truenas_update_status: "{{ truenas_update_status_raw.stdout | trim | from_json }}"
+
+    - name: Fail if TrueNAS update status returned an error
+      ansible.builtin.fail:
+        msg: "TrueNAS update status error: {{ truenas_update_status.error | default('unknown error') }}"
+      when: (truenas_update_status.code | default('ERROR')) != "NORMAL"
+
+    - name: Set TrueNAS update facts
+      ansible.builtin.set_fact:
+        truenas_current_version: "{{ truenas_version.stdout | trim }}"
+        truenas_new_version: "{{ truenas_update_status.status.new_version.version | default('') | trim }}"
+
+    - name: Set TrueNAS update availability
+      ansible.builtin.set_fact:
+        truenas_update_available: "{{ truenas_new_version | length > 0 }}"
+
+    - name: Show TrueNAS update status
+      ansible.builtin.debug:
+        msg:
+          - "Current TrueNAS version: {{ truenas_current_version }}"
+          - "Available update: {{ truenas_new_version if truenas_update_available else 'none' }}"
+          - "Update available: {{ truenas_update_available }}"
+          - "Apply updates enabled: {{ truenas_apply_updates }}"
+          - "Reboot after update enabled: {{ truenas_reboot_after_update }}"
+
+    - name: Stop if no TrueNAS update is available
+      ansible.builtin.debug:
+        msg: "No TrueNAS update available."
+      when: not truenas_update_available | bool
+
+    - name: Stop safely when update exists but apply mode is disabled
+      ansible.builtin.debug:
+        msg: "TrueNAS update is available, but truenas_apply_updates=false. Nothing was installed."
+      when:
+        - truenas_update_available | bool
+        - not truenas_apply_updates | bool
+
+    - name: Apply TrueNAS update
+      ansible.builtin.raw: >-
+        /usr/bin/midclt call update.run
+        '{"reboot": {{ truenas_reboot_after_update | bool | lower }}}'
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool
+      changed_when: true
+
+    - name: Wait for TrueNAS SSH to go down after update reboot
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ ansible_port | default(22) }}"
+        state: stopped
+        delay: 60
+        timeout: "{{ truenas_reboot_timeout_seconds }}"
+      delegate_to: localhost
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool
+        - truenas_reboot_after_update | bool
+
+    - name: Wait for TrueNAS SSH to come back
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: "{{ ansible_port | default(22) }}"
+        state: started
+        delay: 30
+        timeout: "{{ truenas_reboot_timeout_seconds }}"
+      delegate_to: localhost
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool
+        - truenas_reboot_after_update | bool
+
+    - name: Wait for TrueNAS middleware after reboot
+      ansible.builtin.raw: /usr/bin/midclt call system.ready
+      register: truenas_ready_after_reboot
+      until: truenas_ready_after_reboot.stdout | trim | lower == "true"
+      retries: 60
+      delay: 10
+      changed_when: false
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool
+        - truenas_reboot_after_update | bool
+
+    - name: Show final TrueNAS version
+      ansible.builtin.raw: /usr/bin/midclt call system.version
+      register: truenas_final_version
+      changed_when: false
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool
+
+    - name: Confirm TrueNAS update result
+      ansible.builtin.debug:
+        msg: "TrueNAS final version: {{ truenas_final_version.stdout | trim }}"
+      when:
+        - truenas_update_available | bool
+        - truenas_apply_updates | bool

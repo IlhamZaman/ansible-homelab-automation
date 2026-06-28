@@ -1,0 +1,47 @@
+---
+- name: TrueNAS health check
+  hosts: truenas_servers
+  become: false
+  gather_facts: false
+  serial: 1
+
+  tasks:
+    - name: Verify midclt exists
+      ansible.builtin.raw: test -x /usr/bin/midclt
+      changed_when: false
+
+    - name: Wait for TrueNAS middleware to become ready
+      ansible.builtin.raw: /usr/bin/midclt call system.ready
+      register: truenas_ready
+      until: truenas_ready.stdout | trim | lower == "true"
+      retries: 30
+      delay: 10
+      changed_when: false
+
+    - name: Show TrueNAS middleware readiness result
+      ansible.builtin.debug:
+       msg: "TrueNAS middleware ready result: {{ truenas_ready.stdout | trim }}"
+
+    - name: Get TrueNAS version
+      ansible.builtin.raw: /usr/bin/midclt call system.version
+      register: truenas_version
+      changed_when: false
+
+    - name: Get TrueNAS active alerts
+      ansible.builtin.raw: /usr/bin/midclt call alert.list
+      register: truenas_alerts_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Parse TrueNAS alerts
+      ansible.builtin.set_fact:
+        truenas_alerts: "{{ truenas_alerts_raw.stdout | trim | from_json }}"
+      when: truenas_alerts_raw.rc == 0 and (truenas_alerts_raw.stdout | trim | length) > 0
+
+    - name: Show TrueNAS health summary
+      ansible.builtin.debug:
+        msg:
+          - "TrueNAS host: {{ inventory_hostname }}"
+          - "TrueNAS version: {{ truenas_version.stdout | trim }}"
+          - "TrueNAS middleware ready: {{ truenas_ready.stdout | trim }}"
+          - "TrueNAS active alerts: {{ truenas_alerts | default([]) | length }}"

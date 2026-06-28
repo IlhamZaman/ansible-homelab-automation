@@ -1,11 +1,21 @@
 ---
-- name: Reboot all Linux servers
+- name: Reboot Linux VMs only
   hosts: linux_servers
-  become: yes
-  gather_facts: no
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    confirm_vm_reboot: false
+
+  pre_tasks:
+    - name: Safety confirmation
+      ansible.builtin.fail:
+        msg: "Refusing to reboot Linux VMs. Run again with -e confirm_vm_reboot=true"
+      when: not confirm_vm_reboot | bool
 
   tasks:
-    - name: Reboot server
+    - name: Reboot Linux VM
       ansible.builtin.reboot:
         msg: "Reboot triggered by Ansible"
         reboot_timeout: 600

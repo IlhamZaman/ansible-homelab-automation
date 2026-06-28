@@ -1,58 +1,7 @@
 ---
-- name: Update Debian and Ubuntu servers
-  hosts: ubuntu_servers:debian_servers
-  become: true
-
-  tasks:
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: true
-        cache_valid_time: 3600
-
-    - name: Upgrade apt packages
-      ansible.builtin.apt:
-        upgrade: dist
-
-    - name: Remove unused apt packages
-      ansible.builtin.apt:
-        autoremove: true
-
-    - name: Check if reboot is required
-      ansible.builtin.stat:
-        path: /var/run/reboot-required
-      register: apt_reboot_required
-
-    - name: Show reboot required message
-      ansible.builtin.debug:
-        msg: "Reboot required on {{ inventory_hostname }}"
-      when: apt_reboot_required.stat.exists
-
-
-- name: Update Fedora and AlmaLinux servers
-  hosts: fedora_servers:management
-  become: true
-
-  tasks:
-    - name: Upgrade dnf packages
-      ansible.builtin.dnf:
-        name: "*"
-        state: latest
-
-    - name: Remove unused dnf packages
-      ansible.builtin.dnf:
-        autoremove: true
-
-
-- name: Update openSUSE servers
-  hosts: opensuse_servers
-  become: true
-
-  tasks:
-    - name: Refresh zypper repos
-      ansible.builtin.command: zypper --non-interactive refresh
-      changed_when: false
-
-    - name: Update zypper packages
-      ansible.builtin.command: zypper --non-interactive update
-      register: zypper_update
-      changed_when: "'Nothing to do' not in zypper_update.stdout"
+- import_playbook: update-apt.yml
+- import_playbook: update-fedora.yml
+- import_playbook: update-opensuse.yml
+- import_playbook: update-proxmox.yml
+- import_playbook: update-management.yml
+- import_playbook: update-truenas.yml

@@ -1,11 +1,11 @@
 ---
-- name: Back up important homelab config files
+- name: Back up important Linux VM config files
   hosts: linux_servers
   become: true
   gather_facts: true
 
   tasks:
-    - name: Create local backup folder for each host
+    - name: Create local backup folder for each Linux VM
       ansible.builtin.file:
         path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}"
         state: directory
@@ -33,6 +33,46 @@
         dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/hostname"
         flat: true
       failed_when: false
+
+
+- name: Back up Proxmox host configuration
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  serial: 1
+
+  tasks:
+    - name: Create local Proxmox backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/proxmox"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Create Proxmox config archive
+      ansible.builtin.archive:
+        path:
+          - /etc/pve
+          - /etc/network/interfaces
+          - /etc/hosts
+          - /etc/hostname
+          - /etc/apt
+          - /etc/default/grub
+        dest: "/tmp/proxmox-config-{{ inventory_hostname }}.tar.gz"
+        format: gz
+      register: proxmox_config_archive
+
+    - name: Fetch Proxmox config archive
+      ansible.builtin.fetch:
+        src: "/tmp/proxmox-config-{{ inventory_hostname }}.tar.gz"
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/proxmox/proxmox-config-{{ inventory_hostname }}.tar.gz"
+        flat: true
+
+    - name: Remove temporary Proxmox archive
+      ansible.builtin.file:
+        path: "/tmp/proxmox-config-{{ inventory_hostname }}.tar.gz"
+        state: absent
 
 
 - name: Back up Homepage config files
@@ -82,4 +122,83 @@
       loop:
         - /etc/nginx/sites-available/proxmox
         - /etc/nginx/sites-available/truenas
+      failed_when: false
+
+
+- name: Back up Minecraft server config
+  hosts: minecraft
+  become: true
+
+  tasks:
+    - name: Create local Minecraft backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Fetch Minecraft server.properties
+      ansible.builtin.fetch:
+        src: /opt/minecraft/server.properties
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/server.properties"
+        flat: true
+      failed_when: false
+
+    - name: Fetch Minecraft whitelist
+      ansible.builtin.fetch:
+        src: /opt/minecraft/whitelist.json
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/whitelist.json"
+        flat: true
+      failed_when: false
+
+- name: Back up AlmaLinux Management VM configuration
+  hosts: management_vm
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Create local Management VM backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/management"
+        state: directory
+        mode: "0750"
+      delegate_to: localhost
+      become: false
+
+    - name: Back up Management VM system files
+      ansible.builtin.fetch:
+        src: "{{ item }}"
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/management/"
+        flat: true
+      loop:
+        - /etc/ssh/sshd_config
+        - /etc/fstab
+        - /etc/hostname
+        - /etc/hosts
+        - /etc/dnf/dnf.conf
+      failed_when: false
+
+    - name: Create Ansible project backup archive
+      ansible.builtin.archive:
+        path:
+          - /home/izaman/homelab/ansible
+        dest: /tmp/ansible-project-backup.tar.gz
+        format: gz
+        exclude_path:
+          - /home/izaman/homelab/ansible/backups
+          - /home/izaman/homelab/ansible/.git
+      failed_when: false
+
+    - name: Fetch Ansible project backup archive
+      ansible.builtin.fetch:
+        src: /tmp/ansible-project-backup.tar.gz
+        dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/management/ansible-project-backup.tar.gz"
+        flat: true
+      failed_when: false
+
+    - name: Remove temporary Ansible backup archive
+      ansible.builtin.file:
+        path: /tmp/ansible-project-backup.tar.gz
+        state: absent
       failed_when: false

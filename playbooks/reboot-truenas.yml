@@ -1,0 +1,39 @@
+---
+- name: Reboot TrueNAS safely
+  hosts: truenas_servers
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    confirm_truenas_reboot: false
+
+  tasks:
+    - name: Refuse to reboot unless explicitly confirmed
+      ansible.builtin.fail:
+        msg: "Refusing to reboot TrueNAS. Run again with -e confirm_truenas_reboot=true"
+      when: not confirm_truenas_reboot | bool
+
+    - name: Verify midclt exists
+      ansible.builtin.raw: test -x /usr/bin/midclt
+      changed_when: false
+
+    - name: Wait for TrueNAS middleware to become ready
+      ansible.builtin.raw: /usr/bin/midclt call system.ready
+      register: truenas_ready
+      until: truenas_ready.stdout | trim | lower == "true"
+      retries: 30
+      delay: 10
+      changed_when: false
+
+    - name: Show TrueNAS middleware readiness result
+      ansible.builtin.debug:
+        msg: "TrueNAS middleware ready result: {{ truenas_ready.stdout | trim }}"
+
+    - name: Show reboot warning
+      ansible.builtin.debug:
+        msg: "TrueNAS is ready. Reboot command is the final task. This playbook will not wait for TrueNAS to come back."
+
+    - name: Reboot TrueNAS now
+      ansible.builtin.raw: /usr/sbin/reboot
+      changed_when: true
