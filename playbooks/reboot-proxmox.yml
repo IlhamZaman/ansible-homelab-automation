@@ -7,7 +7,6 @@
 
   vars:
     confirm_proxmox_reboot: false
-    reboot_delay_minutes: 1
 
   pre_tasks:
     - name: Safety confirmation
@@ -18,20 +17,18 @@
           -e confirm_proxmox_reboot=true
       when: not confirm_proxmox_reboot | bool
 
+    - name: Show reboot message
+      ansible.builtin.debug:
+        msg: >
+          Proxmox rebooting now.
+          Your Management VM will go offline shortly.
+
   tasks:
     - name: Schedule Proxmox reboot
       ansible.builtin.command:
         argv:
           - /usr/sbin/shutdown
           - -r
-          - "+{{ reboot_delay_minutes }}"
+          - now
           - "Ansible scheduled Proxmox reboot"
-      async: 5
-      poll: 0
       changed_when: true
-
-    - name: Show reboot message
-      ansible.builtin.debug:
-        msg: >
-          Proxmox reboot scheduled in {{ reboot_delay_minutes }} minute(s).
-          Your Ansible Management VM will go offline when Proxmox shuts down.
