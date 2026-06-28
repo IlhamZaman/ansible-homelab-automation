@@ -1,5 +1,5 @@
 ---
-- name: Schedule AlmaLinux Management VM reboot
+- name: AlmaLinux Management VM reboot
   hosts: management_vm
   become: true
   gather_facts: false
@@ -25,7 +25,7 @@
           Your Management VM will reboot shortly.
 
   tasks:
-    - name: Schedule Management VM reboot
+    - name: Management VM reboot
       ansible.builtin.command:
         argv:
           - /usr/sbin/shutdown
