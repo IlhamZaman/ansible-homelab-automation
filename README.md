@@ -8,11 +8,13 @@ I used Ansible to automate the management of my Hypervisor, TrueNAS, and Linux v
 - Control Node: AlmaLinux 9 Management VM
 - Managed Services:
   - Proxmox VE Hypervisor
+  - Monitoring LXC
   - Management VM
   - Cloudflare Gateway VM (Ubuntu Server 26.04)
   - TrueNAS Scale
   - Jellyfin VM (Debian 13.4)
-  - Personal Minecraft Server VM (Debian 13.4)
+  - Immich VM (Debian 13.4)
+  - Personal Minecraft Server VMs (Debian 13.4)
   - Technitium DNS VM (openSUSE Leap)
   - Uptime Kuma / Homepage VM (Fedora Workstation 44)
 - Network: Private homelab LAN with no public SSH exposure
@@ -27,6 +29,7 @@ I used Ansible to automate the management of my Hypervisor, TrueNAS, and Linux v
 | `truenas_servers` | TrueNAS |
 | `ubuntu_servers` | Ubuntu-based services such as `cloudflared` |
 | `debian_servers` | Debian-based services such as Jellyfin |
+| `monitoring_servers` | Debian LXC running services like Prometheus / Grafana |
 | `fedora_servers` | Fedora-based services such as Uptime Kuma / Homepage |
 | `opensuse_servers` | openSUSE-based services such as Technitium DNS |
 
@@ -35,17 +38,17 @@ I used Ansible to automate the management of my Hypervisor, TrueNAS, and Linux v
 | Playbook | What it does | Homelab use case |
 |---|---|---|
 | `baseline-packages.yml` | Installs basic tools on all managed Linux systems | Helps with replicating systems quickly |
-| `install-qemu-agent.yml` | Installs and starts the QEMU Guest Agent on managed Linux systems | Allows for better VM management |
+| `install-qemu-agent.yml` | Installs and starts the QEMU Guest Agent on managed Linux VMs | Allows for better VM management |
 | `health-check.yml` | Checks uptime, disk, memory, and failed services on all managed Linux systems | Quick VM health overview |
 | `truenas-health-check.yml` | Checks TrueNAS middleware readiness, version, and active alerts. | Quick TrueNAS health overview |
 | `check-services.yml` | Checks status of important services on all managed Linux systems | Verifies Proxmox services, cloudflared, nginx, Homepage, Uptime Kuma, Jellyfin, and Technitium DNS are running (Maintenance Related) |
-| `backup-configs.yml` | Backs up important configuration files from Hypervisor and managed VMs | Keeps copies of SSH, hostname, fstab, and service configs (Maintenance Related) |
-| `update-all.yml` | Updates packages on all managed systems | Keeps homelab Hypervisor & VMs patched (Maintenance Related) |
+| `backup-configs.yml` | Backs up important configuration files from Hypervisor, managed VMs, and LXCs | Keeps copies of SSH, hostname, fstab, and service configs (Maintenance Related) |
+| `update-all.yml` | Updates packages on all managed systems | Keeps homelab Hypervisor, VMs, and LXCs patched (Maintenance Related) |
 | `update-DISTRO/PACKAGE-MANAGER-NAME.yml` | Updates packages on Proxmox VE and all managed Virtual Machines | Keeps homelab Hypervisor & VMs patched (Maintenance Related) |
 | `reboot-report.yml` | Checks uptime/reboot status after maintenance | Confirms systems came back online properly (Maintenance Related) |
 | `reboot-proxmox.yml` | Reboots Hypervisor safely | Used for controlled maintenance windows (Maintenance Related) |
 | `reboot-truenas.yml` | Reboots TrueNAS VM safely | Used for controlled maintenance windows (Maintenance Related) |
-| `reboot-vms.yml` | Reboots selected Linux VMs safely | Used for controlled maintenance windows (Maintenance Related) |
+| `reboot-vms.yml` | Reboots selected Linux VMs & LXC safely | Used for controlled maintenance windows (Maintenance Related) |
 
 
 
