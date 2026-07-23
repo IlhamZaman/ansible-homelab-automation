@@ -123,6 +123,33 @@
         var: pm2_status.stdout_lines
 
 
+- name: Check Monitoring LXC services
+  hosts: monitoring_servers
+  become: true
+  tasks:
+    - name: Check Prometheus
+      ansible.builtin.systemd:
+        name: prometheus
+      register: prometheus_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show Prometheus status
+      ansible.builtin.debug:
+        msg: "prometheus is {{ prometheus_status.status.ActiveState | default('not found') }}"
+
+    - name: Check Grafana
+      ansible.builtin.systemd:
+        name: grafana-server
+      register: grafana_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show Grafana status
+      ansible.builtin.debug:
+        msg: "grafana-server is {{ grafana_status.status.ActiveState | default('not found') }}"
+
+
 - name: Check Jellyfin service
   hosts: jellyfin
   become: true

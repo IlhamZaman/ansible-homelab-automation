@@ -7,6 +7,7 @@
     - name: Install useful packages
       ansible.builtin.apt:
         name:
+          - fastfetch
           - curl
           - wget
           - git
@@ -30,6 +31,7 @@
     - name: Install useful packages
       ansible.builtin.dnf:
         name:
+          - fastfetch
           - curl
           - wget
           - git
@@ -52,7 +54,7 @@
     - name: Install useful packages
       ansible.builtin.command: >
         zypper --non-interactive install
-        curl wget git htop nano vim unzip tar ca-certificates net-tools bind-utils
+        curl wget fastfetch git htop nano vim unzip tar ca-certificates net-tools bind-utils
       register: zypper_baseline
       changed_when: "'Nothing to do' not in zypper_baseline.stdout"
 
@@ -64,6 +66,7 @@
     - name: Install useful Management VM packages
       ansible.builtin.dnf:
         name:
+          - fastfetch
           - curl
           - wget
           - git

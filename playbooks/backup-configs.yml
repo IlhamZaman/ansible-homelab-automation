@@ -1,6 +1,6 @@
 ---
 - name: Back up important Linux VM config files
-  hosts: linux_servers
+  hosts: linux_servers:monitoring_servers
   become: true
   gather_facts: true
 

@@ -1,6 +1,6 @@
 ---
-- name: Reboot Linux VMs only
-  hosts: linux_servers
+- name: Reboot Linux VMs and LXCs only
+  hosts: linux_servers:monitoring_servers
   become: true
   gather_facts: false
   serial: 1
@@ -11,11 +11,11 @@
   pre_tasks:
     - name: Safety confirmation
       ansible.builtin.fail:
-        msg: "Refusing to reboot Linux VMs. Run again with -e confirm_vm_reboot=true"
+        msg: "Refusing to reboot Linux VMs & LXCs. Run again with -e confirm_vm_reboot=true"
       when: not confirm_vm_reboot | bool
 
   tasks:
-    - name: Reboot Linux VM
+    - name: Reboot Linux VM & LXC
       ansible.builtin.reboot:
         msg: "Reboot triggered by Ansible"
         reboot_timeout: 600

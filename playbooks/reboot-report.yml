@@ -20,7 +20,7 @@
 
 
 - name: Check reboot requirements on Ubuntu and Debian VMs
-  hosts: ubuntu_servers:debian_servers
+  hosts: ubuntu_servers:debian_servers:monitoring_servers
   become: true
   tasks:
     - name: Check if reboot is required
