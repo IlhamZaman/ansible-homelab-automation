@@ -11,7 +11,7 @@ I used Ansible to automate the management of my Hypervisor, TrueNAS, Linux virtu
   - Monitoring LXC
   - AlmaLinux Management VM
   - Cloudflare Gateway VM (Ubuntu Server 26.04)
-  - Hermes Agent VM
+  - Hermes Agent VM (Ubuntu Server 26.04)
   - TrueNAS SCALE
   - Jellyfin VM (Debian 13.4)
   - Immich VM (Debian 13.4)
