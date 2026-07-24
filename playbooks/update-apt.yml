@@ -1,6 +1,6 @@
 ---
 - name: Update Debian and Ubuntu VMs
-  hosts: ubuntu_servers:debian_servers:monitoring_servers
+  hosts: ubuntu_servers:hermes_servers:debian_servers:monitoring_servers
   become: true
   gather_facts: true
 

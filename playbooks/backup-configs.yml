@@ -1,6 +1,6 @@
 ---
 - name: Back up important Linux VM config files
-  hosts: linux_servers:monitoring_servers
+  hosts: linux_servers:hermes_servers:monitoring_servers
   become: true
   gather_facts: true
 
@@ -126,8 +126,13 @@
 
 
 - name: Back up Minecraft server config
-  hosts: minecraft
+  hosts: minecraft:minecraft2
   become: true
+
+  vars:
+    minecraft_config_paths:
+      minecraft: /home/izaman/MinecraftServer
+      minecraft2: /home/izaman/MCServer
 
   tasks:
     - name: Create local Minecraft backup folder
@@ -140,14 +145,14 @@
 
     - name: Fetch Minecraft server.properties
       ansible.builtin.fetch:
-        src: /opt/minecraft/server.properties
+        src: "{{ minecraft_config_paths[inventory_hostname] }}/server.properties"
         dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/server.properties"
         flat: true
       failed_when: false
 
     - name: Fetch Minecraft whitelist
       ansible.builtin.fetch:
-        src: /opt/minecraft/whitelist.json
+        src: "{{ minecraft_config_paths[inventory_hostname] }}/whitelist.json"
         dest: "{{ playbook_dir }}/../backups/{{ inventory_hostname }}/minecraft/whitelist.json"
         flat: true
       failed_when: false

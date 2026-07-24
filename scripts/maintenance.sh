@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-cd ~/homelab/ansible
+cd /home/izaman/homelab/ansible
 
 export ANSIBLE_CONFIG="$(pwd)/ansible.cfg"
 

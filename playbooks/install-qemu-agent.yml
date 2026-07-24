@@ -1,6 +1,6 @@
 ---
 - name: Install and enable qemu-guest-agent on Debian and Ubuntu VMs
-  hosts: ubuntu_servers:debian_servers
+  hosts: ubuntu_servers:hermes_servers:debian_servers
   become: true
 
   tasks:

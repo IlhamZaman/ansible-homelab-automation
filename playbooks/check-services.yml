@@ -149,6 +149,26 @@
       ansible.builtin.debug:
         msg: "grafana-server is {{ grafana_status.status.ActiveState | default('not found') }}"
 
+    - name: Check Monitoring exporters
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+      loop:
+        - prometheus-node-exporter
+        - prometheus-pve-exporter
+        - graphite_exporter
+      register: monitoring_exporter_status
+      failed_when: false
+      changed_when: false
+
+    - name: Show Monitoring exporter status
+      ansible.builtin.debug:
+        msg: >-
+          {{ item.item }} is
+          {{ item.status.ActiveState | default('not found') }}
+      loop: "{{ monitoring_exporter_status.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
 
 - name: Check Jellyfin service
   hosts: jellyfin
